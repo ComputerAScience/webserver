@@ -28,7 +28,7 @@ AsyncLogging::AsyncLogging(std::string logFileName_, int flushInterval)
 }
 
 void AsyncLogging::append(const char *logline, int len) {
-    std::lock_guard lk(mutex_);
+    std::lock_guard<std::mutex> lk(mutex_);
     if (currentBuffer_->avail() > len) {
         currentBuffer_->append(logline, len);
     } else {
@@ -58,7 +58,7 @@ void AsyncLogging::threadFunc() {
         assert(buffersToWrite.empty());
 
         {
-            std::unique_lock lk(mutex_);
+            std::unique_lock<std::mutex> lk(mutex_);
             if (buffers_.empty())  // unusual usage!
             {
                 cond_.wait_for(lk,std::chrono::seconds(flushInterval_));
@@ -74,13 +74,6 @@ void AsyncLogging::threadFunc() {
         assert(!buffersToWrite.empty());
 
         if (buffersToWrite.size() > 25) {
-            // char buf[256];
-            // snprintf(buf, sizeof buf, "Dropped log messages at %s, %zd larger
-            // buffers\n",
-            //          Timestamp::now().toFormattedString().c_str(),
-            //          buffersToWrite.size()-2);
-            // fputs(buf, stderr);
-            // output.append(buf, static_cast<int>(strlen(buf)));
             buffersToWrite.erase(buffersToWrite.begin() + 2, buffersToWrite.end());
         }
 

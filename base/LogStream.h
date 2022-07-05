@@ -6,7 +6,7 @@
 #define WEBSERVER_LOGSTREAM_H
 
 
-#include <assert.h>
+#include <cassert>
 #include <string.h>
 #include <string>
 #include "noncopyable.h"
